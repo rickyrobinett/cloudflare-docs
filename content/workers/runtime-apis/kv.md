@@ -24,7 +24,7 @@ The descriptions of KV methods below also contain links to Wrangler or REST API 
 To create a new key-value pair, or to update the value for a particular key, call the `put` method on any namespace you have bound to your script. The basic form of this method looks like this:
 
 ```js
-await NAMESPACE.put(key, value);
+await env.NAMESPACE.put(key, value);
 ```
 
 #### Parameters
@@ -93,7 +93,7 @@ You can also [write with an expiration on the command line via Wrangler](/worker
 To associate some metadata with a key-value pair, set `metadata` to any arbitrary object (must serialize to JSON) in the `put` options object on a `put` call. To do this in a Worker:
 
 ```js
-await NAMESPACE.put(key, value, {
+await env.NAMESPACE.put(key, value, {
   metadata: { someMetadataKey: "someMetadataValue" },
 });
 ```
@@ -105,7 +105,7 @@ The serialized JSON representation of the metadata object must be no more than 1
 To get the value for a given key, you can call the `get` method on any namespace you have bound to your script:
 
 ```js
-NAMESPACE.get(key);
+env.NAMESPACE.get(key);
 ```
 
 The method returns a promise you can `await` to get the value. If the key is not found, the promise will resolve with the literal value `null`.
@@ -157,7 +157,7 @@ You can [read key-value pairs from the command line with Wrangler](/workers/wran
 You can pass in an options object with a `type` parameter to the `get` method:
 
 ```js
-NAMESPACE.get(key, { type: "text" });
+env.NAMESPACE.get(key, { type: "text" });
 ```
 
 The `type` parameter can be any of:
@@ -176,7 +176,7 @@ For large values, the choice of `type` can have a noticeable effect on latency a
 The `get` options object also accepts a `cacheTtl` parameter:
 
 ```js
-NAMESPACE.get(key, { cacheTtl: 3600 });
+env.NAMESPACE.get(key, { cacheTtl: 3600 });
 ```
 
 The `cacheTtl` parameter must be an integer that is greater than or equal to `60`, which is the default. It defines the length of time in seconds that a KV result is cached in the global network location that it is accessed from. This can be useful for reducing cold read latency on keys that are read relatively infrequently. It is especially useful if your data is write-once or write-rarely. It is not recommended if your data is updated often and you need to see updates shortly after they are written, because writes that happen from other global network locations will not be visible until the cached value expires.
@@ -188,7 +188,7 @@ The effective Cache TTL of an already cached item can be reduced by getting it a
 You can get the metadata associated with a key-value pair alongside its value by calling the `getWithMetadata` method on a namespace you have bound in your script:
 
 ```js
-const { value, metadata } = await NAMESPACE.getWithMetadata(key);
+const { value, metadata } = await env.NAMESPACE.getWithMetadata(key);
 ```
 
 If there is no metadata associated with the requested key-value pair, `null` will be returned for metadata.
@@ -200,7 +200,7 @@ You can pass an options object with `type` and/or `cacheTtl` parameters to the `
 To delete a key-value pair, call the `delete` method on any namespace you have bound to your script:
 
 ```js
-await NAMESPACE.delete(key);
+await env.NAMESPACE.delete(key);
 ```
 
 This will remove the key and value from your namespace. As with any operations, it may take some time to see that they key has been deleted from various points in the Cloudflare global network.
@@ -337,11 +337,11 @@ Keys are always returned in lexicographically sorted order according to their UT
 If there are more keys to fetch, the `list_complete` key will be set to `false` and a `cursor` will also be returned. In this case, you can call `list` again with the `cursor` value to get the next batch of keys:
 
 ```js
-const value = await NAMESPACE.list();
+const value = await env.NAMESPACE.list();
 
 const cursor = value.cursor;
 
-const next_value = await NAMESPACE.list({ cursor: cursor });
+const next_value = await env.NAMESPACE.list({ cursor: cursor });
 ```
 
 Note that checking for an empty array in `keys` is not sufficient to determine whether there are more keys to fetch; check `list_complete` instead. The reason it is possible to have an empty array in `keys`, but still have more keys to fetch, is because [recently expired or deleted keys](https://en.wikipedia.org/wiki/Tombstone_%28data_store%29) must be iterated through but will not be included in the returned `keys`.
