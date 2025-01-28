@@ -1,7 +1,0 @@
-<details class="DocsMarkdown"
-  {{ with .Get "open" }} open{{ end }}>
-    <summary>{{ .Get "header" | default "Header tag required!" }}</summary>
-    <div>
-      {{- .Page.RenderString .Inner -}}
-    </div>
-</details>
