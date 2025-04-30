@@ -19,7 +19,7 @@ import { APIRequest } from "~/components";
 	path="/zones/{zone_id}/api_gateway/settings/schema_validation"
 	method="PUT"
 	json={{
-		validation_default_mitigation_action: "block"
+		validation_default_mitigation_action: "block",
 	}}
 />
 
@@ -36,7 +36,30 @@ import { APIRequest } from "~/components";
 	method="POST"
 	form={{
 		requireSignedURLs: true,
-		metadata: '{"key":"value"}'
+		metadata: '{"key":"value"}',
+	}}
+/>
+
+<APIRequest
+	path="/zones/{zone_id}/cloud_connector/rules"
+	method="PUT"
+	json={[
+		{
+			expression: 'http.request.uri.path wildcard "/images/*"',
+			provider: "cloudflare_r2",
+			description: "Connect to R2 bucket containing images",
+			parameters: {
+				host: "mybucketcustomdomain.example.com",
+			},
+		},
+	]}
+/>
+
+<APIRequest
+	path="/zones/{zone_id}/page_shield/scripts"
+	method="GET"
+	parameters={{
+		direction: "asc",
 	}}
 />
 ```
@@ -65,13 +88,22 @@ The HTTP method to use.
 
 **type:** `Record<string, any>`
 
-The path parameters to substitute.
+The parameters to substitute - either in the URL path or as query parameters.
+
+For example, `/zones/{zone_id}/page_shield/scripts` can be transformed into `/zones/123/page_shield/scripts?direction=asc` with the following:
+
+```mdx
+parameters={{
+	zone_id: "123",
+	direction: "asc"
+}}
+```
 
 If not provided, the component will default to an environment variable. For example, `{setting_id}` will be replaced with `$SETTING_ID`.
 
 ### `json`
 
-**type:** `Record<string, any>`
+**type:** `Record<string, any> | Record<string, any>[]`
 
 The JSON payload to send.
 
